@@ -1,0 +1,75 @@
+Sub PrintBGroupsInColumns()
+    Dim ws As Worksheet
+    Dim lastRow As Long, i As Long
+    Dim key As Variant, prevKey As Variant
+    Dim outCol As Long, outRow As Long
+    Dim haveKey As Boolean
+    Dim s As String
+
+    On Error GoTo Fail
+
+    Set ws = ActiveSheet
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    If lastRow < 2 Then
+        MsgBox "No data in column A.", vbExclamation
+        Exit Sub
+    End If
+
+    ' --- 1) Sort A ascending, B ascending ---
+    With ws.Sort
+        .SortFields.Clear
+        .SortFields.Add key:=ws.Range("A2:A" & lastRow), _
+                        SortOn:=xlSortOnValues, Order:=xlAscending
+        .SortFields.Add key:=ws.Range("B2:B" & lastRow), _
+                        SortOn:=xlSortOnValues, Order:=xlAscending
+        .SetRange ws.Range("A2:B" & lastRow)
+        .Header = xlNo
+        .Apply
+    End With
+
+    ' --- 2) Clear old output in columns D onward ---
+    ws.Range("D1:XFD1048576").ClearContents
+
+    ' --- 3) Write each unique A group to its own column starting at D ---
+    outCol = 4          ' D
+    outRow = 2          ' row 1 = headers, row 2+ = B values
+    haveKey = False
+
+    For i = 2 To lastRow
+        key = ws.Cells(i, "A").Value
+
+        ' Skip blanks, errors, "frame", "#"
+        If Not IsError(key) And Len(key) > 0 Then
+            s = LCase(CStr(key))
+            If s <> "frame" And s <> "#" Then
+
+                If Not haveKey Then
+                    ws.Cells(1, outCol).Value = key       ' header row 1
+                    prevKey = key
+                    haveKey = True
+                ElseIf key <> prevKey Then
+                    outCol = outCol + 1
+                    ws.Cells(1, outCol).Value = key       ' next header
+                    prevKey = key
+                    outRow = 2
+                End If
+
+                ws.Cells(outRow, outCol).Value = ws.Cells(i, "B").Value
+                outRow = outRow + 1
+            End If
+        End If
+    Next i
+
+    ' --- 4) Format ---
+    If haveKey Then
+        ws.Range(ws.Cells(1, 4), ws.Cells(1, outCol)).Font.Bold = True
+    End If
+    ws.Columns.AutoFit
+
+    MsgBox "Done. Wrote " & (outCol - 3) & " column(s) starting at D1.", vbInformation
+    Exit Sub
+
+Fail:
+    MsgBox "Error " & Err.Number & ": " & Err.Description, vbCritical
+End Sub
+
