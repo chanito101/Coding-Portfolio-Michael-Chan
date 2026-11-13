@@ -3,8 +3,9 @@ clear; clc;
 mu_sigma = 310e6;
 sigma_sigma = 10e6;% standard dev of UTS[10 MPa]
 %geometry(circular, ASTM E8)
-D_nom = 0.5 * 0.0254;% Nominal diameter(m)
-delta_D = 0.0005 * 0.0254; %Uncertainty in diameter(m)
+D_nom = 0.5 * 0.0254;%diameter (m)
+%Uncertainty 
+delta_D = 0.0005 * 0.0254;
 %number of Monte Carlo iterations
 N = 100000;
 %preallocate array for failure loads
