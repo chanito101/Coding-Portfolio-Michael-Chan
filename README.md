@@ -1,0 +1,1 @@
+This portfolio consists of demonstrations of ability to write various kinds and lengths of code. It's meant to demonstrate an intermediate understanding of the MATLAB and Python programming languages.
